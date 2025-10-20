@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha de Paleontologia</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50"/>
+
+    <script src="proj4.js"></script>
+    
+    <script src="jszip.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="date"], input[type="tel"], textarea, select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .options-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .option-item {
+            display: flex;
+            align-items: center;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #get-coords-btn {
+            width: auto;
+            padding: 8px 15px;
+            font-size: 14px;
+            margin-top: 8px;
+            background-color: #555;
+        }
+        #get-coords-btn:hover {
+            background-color: #333;
+        }
+        #photo-input {
+            display: none;
+        }
+        #photo-previews img {
+            max-width: 150px;
+            margin: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        
+        /* Estilo para o botão de exportação único */
+        #exportButton {
+            background-color: #4CAF50; /* Verde */
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Ficha de Paleontologia</h1>
+    <form id="paleoForm">
+
+        <div class="form-group">
+            <label for="ponto">Ponto</label>
+            <input type="text" id="ponto" name="Ponto" required>
+        </div>
+
+        <div class="form-group">
+            <label for="data">Data</label>
+            <input type="date" id="data" name="Data" required>
+        </div>
+
+        <div class="form-group">
+            <label for="equipe">Equipe</label>
+            <input type="text" id="equipe" name="Equipe" value="Adolpho Milhomem, André Gomide e Richardson Pimenta">
+        </div>
+
+        <div class="form-group">
+            <label for="coordenadas">Coordenadas</label>
+            <input type="text" id="coordenadas" name="Coordenadas">
+            <button type="button" id="get-coords-btn">Obter Coordenadas GPS</button>
+        </div>
+
+        <div class="form-group">
+            <label>Área/Ocupação</label>
+            <div class="options-group">
+                <div class="option-item"><input type="checkbox" name="area_ocupacao" value="Drenagem" id="area_drenagem"><label for="area_drenagem">Drenagem</label></div>
+                <div class="option-item"><input type="checkbox" name="area_ocupacao" value="Edificação" id="area_edificacao"><label for="area_edificacao">Edificação</label></div>
+                <div class="option-item"><input type="checkbox" name="area_ocupacao" value="Estrada vicinal" id="area_estrada"><label for="area_estrada">Estrada vicinal</label></div>
+                <div class="option-item"><input type="checkbox" name="area_ocupacao" value="Mata" id="area_mata"><label for="area_mata">Mata</label></div>
+                <div class="option-item"><input type="checkbox" name="area_ocupacao" value="Mineração" id="area_mineracao"><label for="area_mineracao">Mineração</label></div>
+                <div class="option-item"><input type="checkbox" name="area_ocupacao" value="Outra" id="area_outra"><label for="area_outra">Outra</label></div>
+                <div class="option-item"><input type="checkbox" name="area_ocupacao" value="Pasto" id="area_pasto"><label for="area_pasto">Pasto</label></div>
+                <div class="option-item"><input type="checkbox" name="area_ocupacao" value="Plantação" id="area_plantacao"><label for="area_plantacao">Plantação</label></div>
+                <div class="option-item"><input type="checkbox" name="area_ocupacao" value="Rodovia" id="area_rodovia"><label for="area_rodovia">Rodovia</label></div>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="obs_area_ocupacao">Obs. área/ocupação</label>
+            <input type="text" id="obs_area_ocupacao" name="Obs. área/ocupação">
+        </div>
+
+        <div class="form-group">
+            <label>Declividade</label>
+            <div class="options-group">
+                <div class="option-item"><input type="radio" name="declividade" value="Plana" id="declividade_plana"><label for="declividade_plana">Plana</label></div>
+                <div class="option-item"><input type="radio" name="declividade" value="suave ondulada" id="declividade_suave"><label for="declividade_suave">Suave ondulada</label></div>
+                <div class="option-item"><input type="radio" name="declividade" value="ondulada" id="declividade_ondulada"><label for="declividade_ondulada">Ondulada</label></div>
+                <div class="option-item"><input type="radio" name="declividade" value="forte ondulada" id="declividade_forte"><label for="declividade_forte">Forte ondulada</label></div>
+                <div class="option-item"><input type="radio" name="declividade" value="montanhosa" id="declividade_montanhosa"><label for="declividade_montanhosa">Montanhosa</label></div>
+                <div class="option-item"><input type="radio" name="declividade" value="escarpada" id="declividade_escarpada"><label for="declividade_escarpada">Escarpada</label></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Posição na vertente</label>
+            <div class="options-group">
+                <div class="option-item"><input type="radio" name="posicao_vertente" value="Alta" id="vertente_alta"><label for="vertente_alta">Alta</label></div>
+                <div class="option-item"><input type="radio" name="posicao_vertente" value="Média" id="vertente_media"><label for="vertente_media">Média</label></div>
+                <div class="option-item"><input type="radio" name="posicao_vertente" value="Baixa" id="vertente_baixa"><label for="vertente_baixa">Baixa</label></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="unidade_geologica">Unidade geológica</label>
+            <select id="unidade_geologica" name="Unidade geologica">
+                <option value="Não observado">Não observado</option>
+                <option value="Q2a">Q2a</option>
+                <option value="N1dl">N1dl</option>
+                <option value="NP2_delta_1b">NP2_delta_1b</option>
+                <option value="NP2_mu_2b">NP2_mu_2b</option>
+                <option value="MP2_delta_m">MP2_delta_m</option>
+                <option value="MP2_delta_mag">MP2_delta_mag</option>
+                <option value="MP2_delta_map">MP2_delta_map</option>
+                <option value="MP2_delta_mg">MP2_delta_mg</option>
+                <option value="MP2_delta_mga">MP2_delta_mga</option>
+                <option value="MP2_delta_mgn">MP2_delta_mgn</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Afloramento</label>
+            <div class="options-group">
+                <div class="option-item"><input type="radio" name="afloramento" value="Sim" id="afloramento_sim"><label for="afloramento_sim">Sim</label></div>
+                <div class="option-item"><input type="radio" name="afloramento" value="Não" id="afloramento_nao"><label for="afloramento_nao">Não</label></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="litologia_caract">Litologia e caract. do afloramento</label>
+            <input type="text" id="litologia_caract" name="Litologia e caract. do afloramento">
+        </div>
+
+        <div class="form-group">
+            <label for="atitude_camada">Atitude da camada</label>
+            <input type="tel" id="atitude_camada" name="Atitude da camada" pattern="[0-9]*">
+        </div>
+
+        <div class="form-group">
+            <label for="sedimento">Sedimento (características)</label>
+            <input type="text" id="sedimento" name="Sedimento (caracteríticas)">
+        </div>
+
+        <div class="form-group">
+            <label>Interesse paleontológico</label>
+            <div class="options-group">
+                <div class="option-item"><input type="radio" name="interesse_paleo" value="Sim" id="interesse_sim"><label for="interesse_sim">Sim</label></div>
+                <div class="option-item"><input type="radio" name="interesse_paleo" value="Não" id="interesse_nao"><label for="interesse_nao">Não</V></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="registro_paleo">Registro paleontológico</label>
+            <input type="text" id="registro_paleo" name="Registro paleontológico">
+        </div>
+
+        <div class="form-group">
+            <label for="obs_gerais">Observações gerais</label>
+            <textarea id="obs_gerais" name="Observações gerais"></textarea>
+        </div>
+
+        <button type="button" id="take-photo-btn">Tirar Foto</button>
+        <input type="file" id="photo-input" accept="image/*" capture="camera" multiple>
+        <div id="photo-previews"></div>
+        
+        <button type="button" id="exportButton">Finalizar e exportar</button>
+    </form>
+</div>
+
+<script>
+    let photoCounters = {};
+    document.getElementById('get-coords-btn').addEventListener('click', function() {
+        if (navigator.geolocation) {
+            
+            proj4.defs("EPSG:31983", "+proj=utm +zone=23 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
+            
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                const altitude = position.coords.altitude;
+
+                const utmCoords = proj4("EPSG:4326", "EPSG:31983", [lon, lat]);
+                
+                const easting = utmCoords[0].toFixed(2);
+                const northing = utmCoords[1].toFixed(2);
+                
+                const elevacaoStr = altitude ? `Elevação: ${altitude.toFixed(0)} m.` : 'Elevação: N/A';
+                
+                const zone = "23K"; 
+                const coords = `${zone} ${easting} m E / ${northing} m S. ${elevacaoStr}`;
+                
+                document.getElementById('coordenadas').value = coords;
+                alert('Coordenadas capturadas com sucesso!');
+
+            }, function(error) {
+                let errorMessage = 'Não foi possível obter a localização.';
+                switch(error.code) {
+                    case error.PERMISSION_DENIED:
+                        errorMessage = "Você negou a permissão para a Geolocalização.";
+                        break;
+                    case error.POSITION_UNAVAILABLE:
+                        errorMessage = "A informação de localização não está disponível.";
+                        break;
+                    case error.TIMEOUT:
+                        errorMessage = "A requisição para obter a localização expirou.";
+                        break;
+                    case error.UNKNOWN_ERROR:
+                        errorMessage = "Ocorreu um erro desconhecido.";
+                        break;
+                }
+                alert(errorMessage);
+            });
+        } else {
+            alert('Seu navegador não suporta geolocalização.');
+        }
+    });
+
+
+    // --- BOTÃO DE EXPORTAÇÃO ÚNICO (CSV + TXT DENTRO DE UM ZIP) ---
+    document.getElementById('exportButton').addEventListener('click', function() {
+        const ponto = document.getElementById('ponto').value.trim();
+        const dataValue = document.getElementById('data').value.trim();
+
+        if (!ponto || !dataValue) {
+            alert('Por favor, preencha os campos "Ponto" e "Data" para exportar o arquivo.');
+            return;
+        }
+
+        // --- 1. Definir o nome base do arquivo ---
+        const sanitizedPonto = ponto.replace(/[^a-z0-9_-]/gi, '_');
+        const formattedData = dataValue.replace(/-/g, '');
+        const baseFilename = `${sanitizedPonto}_${formattedData}`;
+
+        // --- 2. Gerar conteúdo do CSV ---
+        const headers = [];
+        const values = [];
+        const addData = (header, value) => {
+            const cleanValue = value.toString().replace(/(\r\n|\n|\r)/gm, " ").replace(/;/g, ",");
+            headers.push(header);
+            values.push(cleanValue);
+        };
+        
+        addData("Ponto", ponto);
+        addData("Data", dataValue);
+        addData("Equipe", document.getElementById('equipe').value.trim());
+        addData("Coordenadas", document.getElementById('coordenadas').value.trim());
+        const areaOcupacaoCheckboxes = document.querySelectorAll('input[name="area_ocupacao"]:checked');
+        const areaOcupacaoValues = Array.from(areaOcupacaoCheckboxes).map(cb => cb.value).join(', ');
+        addData("Área/Ocupação", areaOcupacaoValues);
+        addData("Obs. área/ocupação", document.getElementById('obs_area_ocupacao').value.trim());
+        const declividadeValue = document.querySelector('input[name="declividade"]:checked')?.value || '';
+        addData("Declividade", declividadeValue);
+        const posicaoVertenteValue = document.querySelector('input[name="posicao_vertente"]:checked')?.value || '';
+        addData("Posição na vertente", posicaoVertenteValue);
+        addData("Unidade geológica", document.getElementById('unidade_geologica').value.trim());
+        const afloramentoValue = document.querySelector('input[name="afloramento"]:checked')?.value || 'Não';
+        addData("Afloramento", afloramentoValue);
+        addData("Litologia e caract. do afloramento", document.getElementById('litologia_caract').value.trim());
+        addData("Atitude da camada", document.getElementById('atitude_camada').value.trim());
+        addData("Sedimento (características)", document.getElementById('sedimento').value.trim());
+        const interessePaleoValue = document.querySelector('input[name="interesse_paleo"]:checked')?.value || 'Não';
+        addData("Interesse paleontológico", interessePaleoValue);
+        addData("Registro paleontológico", document.getElementById('registro_paleo').value.trim());
+        addData("Observações gerais", document.getElementById('obs_gerais').value.trim());
+
+        const csvHeader = headers.join(';');
+        const csvValues = values.join(';');
+        const BOM = '\uFEFF'; // BOM para garantir a codificação correta no Excel
+        const csvContent = `${BOM}${csvHeader}\n${csvValues}`;
+
+        // --- 3. Gerar conteúdo do TXT ---
+        const txtPonto = ponto;
+        const txtCoordenadas = document.getElementById('coordenadas').value.trim();
+        const txtUnidade = document.getElementById('unidade_geologica').value;
+        const txtAreaOcupacao = areaOcupacaoValues.toLowerCase() || 'não informada';
+        const txtDeclividade = declividadeValue.toLowerCase() || 'não informada';
+        const txtPosVertente = posicaoVertenteValue.toLowerCase() || 'não informada';
+        const txtAfloramento = afloramentoValue;
+        const txtLitologia = document.getElementById('litologia_caract').value.trim();
+        const txtSedimento = document.getElementById('sedimento').value.trim();
+        const txtInteresse = interessePaleoValue;
+        const txtRegistro = document.getElementById('registro_paleo').value.trim();
+        const txtObsGerais = document.getElementById('obs_gerais').value.trim();
+        
+        let textContent = `Ponto ${txtPonto} – ${txtCoordenadas}.\n\n`;
+        textContent += `A localidade está inserida no ${txtUnidade} em uma área de ${txtAreaOcupacao}, com declividade ${txtDeclividade}, na ${txtPosVertente} vertente.`;
+        if (txtSedimento) {
+            textContent += ` O sedimento do local é constituído por ${txtSedimento}.`;
+        }
+        if (txtAfloramento === 'Sim') {
+            textContent += ` Foi observado um afloramento`;
+            if (txtLitologia) {
+                textContent += `, cujas as características são ${txtLitologia}.`;
+            } else {
+                textContent += `.`;
+            }
+        }
+        textContent += `\n\n`;
+        if (txtInteresse === 'Sim') {
+            textContent += `Foram identificadas feições de interesse paleontológico.`;
+            if (txtRegistro) {
+                textContent += ` Registro: ${txtRegistro}.`;
+            }
+        } else {
+            textContent += `Não foram identificadas feições de interesse paleontológico.`;
+        }
+        if (txtObsGerais) {
+            textContent += `\n\nObservações gerais: ${txtObsGerais}`;
+        }
+
+        // --- 4. Criar o ZIP e fazer o download ---
+        try {
+            const zip = new JSZip();
+            zip.file(`${baseFilename}.csv`, csvContent);
+            zip.file(`${baseFilename}.txt`, textContent);
+
+            zip.generateAsync({ type: "blob" })
+                .then(function(blob) {
+                    const link = document.createElement("a");
+                    const url = URL.createObjectURL(blob);
+                    
+                    const zipFilename = `${baseFilename}.zip`;
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", zipFilename);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    alert(`O arquivo ${zipFilename} (contendo o .csv e .txt) foi gerado e o download deve iniciar.`);
+                });
+        } catch (error) {
+            console.error("Erro ao gerar o arquivo zip:", error);
+            alert("Ocorreu um erro ao gerar o arquivo zip.");
+        }
+    });
+
+
+    // --- BOTÃO TIRAR FOTO ---
+    document.getElementById('take-photo-btn').addEventListener('click', function() {
+        document.getElementById('photo-input').click();
+    });
+
+    document.getElementById('photo-input').addEventListener('change', function(event) {
+        const files = event.target.files;
+        if (!files.length) return;
+
+        const pontoBase = document.getElementById('ponto').value.trim();
+        const dataValue = document.getElementById('data').value.trim();
+
+        if (!pontoBase || !dataValue) {
+            alert('Por favor, preencha os campos "Ponto" e "Data" antes de tirar fotos.');
+            event.target.value = '';
+            return;
+        }
+
+        const sanitizedPonto = pontoBase.replace(/[^a-z0-9_-]/gi, '_');
+        const formattedData = dataValue.replace(/-/g, '');
+        const filenameBase = `${sanitizedPonto}_${formattedData}`;
+
+        if (photoCounters[filenameBase] === undefined) {
+            photoCounters[filenameBase] = 1;
+        }
+
+        Array.from(files).forEach(file => {
+            const currentCount = photoCounters[filenameBase]++;
+            const filename = `${filenameBase}(${currentCount}).jpg`;
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(file);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            const previewContainer = document.getElementById('photo-previews');
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            previewContainer.appendChild(img);
+        });
+
+        event.target.value = '';
+        alert(`${files.length} foto(s) foram salvas.`);
+    });
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js').then(registration => {
+        console.log('ServiceWorker registrado com sucesso: ', registration.scope);
+      }, err => {
+        console.log('Registro do ServiceWorker falhou: ', err);
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
